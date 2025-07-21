@@ -13,7 +13,7 @@ interface UserInterfaceProps {
 }
 
 const UserInterface: React.FC<UserInterfaceProps> = ({ backendName }) => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://full-stack-go-sample-backend.onrender.com';
     const [users, setUsers] = useState<User[]>([]);
     const [newUser, setNewUser] = useState({ name: '', email: '' });
     const [updateUser, setUpdateUser] = useState({ id: '', name: '', email: '' });
@@ -48,8 +48,16 @@ const UserInterface: React.FC<UserInterfaceProps> = ({ backendName }) => {
     const createUser = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
+        console.log('Sending data:', newUser);
+
+        if (!newUser.name.trim() || !newUser.email.trim()) {
+            console.error('Name and email are required');
+            return;
+        }
+
         try {
             const response = await axios.post(`${apiUrl}/api/${backendName}/users`, newUser);
+            console.log('Response:', response.data);
             setUsers([response.data, ...users]);
             setNewUser({ name: '', email: '' });
         } catch (error) {
