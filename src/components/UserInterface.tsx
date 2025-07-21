@@ -49,6 +49,7 @@ const UserInterface: React.FC<UserInterfaceProps> = ({ backendName }) => {
         e.preventDefault();
 
         console.log('Sending data:', newUser);
+        console.log('API URL:', `${apiUrl}/api/${backendName}/users`);
 
         if (!newUser.name.trim() || !newUser.email.trim()) {
             console.error('Name and email are required');
@@ -56,12 +57,30 @@ const UserInterface: React.FC<UserInterfaceProps> = ({ backendName }) => {
         }
 
         try {
-            const response = await axios.post(`${apiUrl}/api/${backendName}/users`, newUser);
-            console.log('Response:', response.data);
+            const response = await axios.post(`${apiUrl}/api/${backendName}/users`, newUser, {
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            console.log('Full Response:', response);
+            console.log('Response Data:', response.data);
+            console.log('Response Status:', response.status);
+            
+            // サーバーから最新データを再取得して確認
+            const refreshResponse = await axios.get(`${apiUrl}/api/${backendName}/users`);
+            console.log('Refreshed data:', refreshResponse.data);
+            
             setUsers([response.data, ...users]);
             setNewUser({ name: '', email: '' });
         } catch (error) {
             console.error('Error creating user:', error);
+            if (axios.isAxiosError(error)) {
+                console.error('Status:', error.response?.status);
+                console.error('Status Text:', error.response?.statusText);
+                console.error('Response Data:', error.response?.data);
+                console.error('Request URL:', error.config?.url);
+                console.error('Request Data:', error.config?.data);
+            }
         }
     };
 
